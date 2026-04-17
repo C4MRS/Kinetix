@@ -7,34 +7,57 @@ on:
     branches: ["master"]
 
 jobs:
-  backend-test:
+  docker-ci:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
+      # Inject secrets as environment variables
+      - name: Set environment variables
+        run: echo "CI_ENV=ready"
+        env:
+          MONGO_URI: ${{ secrets.MONGO_URI }}
+          MEILI_HOST: ${{ secrets.MEILI_HOST }}
+          MEILI_MASTER_KEY: ${{ secrets.MEILI_MASTER_KEY }}
+      # Build and start containers
+      - name: Build Docker Compose
+        run: docker compose up -d --build
+        env:
+          MONGO_URI: ${{ secrets.MONGO_URI }}
+          MEILI_HOST: ${{ secrets.MEILI_HOST }}
+          MEILI_MASTER_KEY: ${{ secrets.MEILI_MASTER_KEY }}
+      # Wait for services
+      - name: Wait for services to be ready
+        run: sleep 15
 
-      - name: Install dependencies
+      # Health check backend (retry safe)
+      - name: Check backend health
         run: |
-          cd backend
-          npm install
+          for i in {1..12}; do
+            if curl -s http://localhost:3001; then
+              echo "Backend is up"
+              exit 0
+            fi
+            echo "Waiting for backend..."
+            sleep 3
+          done
 
-      - name: Start backend server
-        run: |
-          cd backend
-          node server.js &
-          sleep 5
+          echo "Backend failed to start"
+          docker logs kinetix-app
+          exit 1
 
-      - name: Check server is running
-        run: |
-          curl -f http://localhost:3001 || exit 1
+      # Run DB verification inside container
+      - name: Run MongoDB verification
+        run: docker exec kinetix-app npm run verify-db
 
-      - name: Run DB verification script
-        run: |
-          cd backend
-          node scripts/verify-db.js
+      # Show logs if something fails (debug helper)
+      - name: Print logs (on failure)
+        if: failure()
+        run: docker logs kinetix-app
+
+      # Cleanup
+      - name: Shutdown containers
+        if: always()
+        run: docker compose down
