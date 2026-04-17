@@ -24,7 +24,7 @@ jobs:
 
       # Wait for services
       - name: Wait for services
-        run: sleep 15
+        run: sleep 20
 
       # Health check backend (retry safe)
       - name: Check backend health
