@@ -14,22 +14,16 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # Inject secrets as environment variables
-      - name: Set environment variables
-        run: echo "CI_ENV=ready"
-        env:
-          MONGO_URI: ${{ secrets.MONGO_URI }}
-          MEILI_HOST: ${{ secrets.MEILI_HOST }}
-          MEILI_MASTER_KEY: ${{ secrets.MEILI_MASTER_KEY }}
-      # Build and start containers
+      # Build containers with GitHub Secrets injected
       - name: Build Docker Compose
         run: docker compose up -d --build
         env:
           MONGO_URI: ${{ secrets.MONGO_URI }}
           MEILI_HOST: ${{ secrets.MEILI_HOST }}
           MEILI_MASTER_KEY: ${{ secrets.MEILI_MASTER_KEY }}
+
       # Wait for services
-      - name: Wait for services to be ready
+      - name: Wait for services
         run: sleep 15
 
       # Health check backend (retry safe)
@@ -44,20 +38,20 @@ jobs:
             sleep 3
           done
 
-          echo "Backend failed to start"
+          echo "Backend failed"
           docker logs kinetix-app
           exit 1
 
-      # Run DB verification inside container
-      - name: Run MongoDB verification
+      # DB verification
+      - name: Run DB verification
         run: docker exec kinetix-app npm run verify-db
 
-      # Show logs if something fails (debug helper)
-      - name: Print logs (on failure)
+      # Debug logs if failure
+      - name: Show logs
         if: failure()
         run: docker logs kinetix-app
 
-      # Cleanup
+      # Cleanup always
       - name: Shutdown containers
         if: always()
         run: docker compose down
