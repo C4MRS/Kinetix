@@ -22,7 +22,10 @@ jobs:
           -X POST "https://cloud.mongodb.com/api/atlas/v1.0/groups/${{ secrets.ATLAS_PROJECT_ID }}/accessList" \
           -d '[{"cidrBlock": "0.0.0.0/0", "comment": "GitHub Actions Temp"}]'
 
-      # Build containers with GitHub Secrets injected
+      - name: Wait Atlas propagation
+        run: sleep 40
+
+        # Build containers with GitHub Secrets injected
       - name: Build Docker Compose
         run: docker compose up -d --build
         env:
