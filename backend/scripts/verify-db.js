@@ -9,7 +9,11 @@ async function testMongo() {
 	const start = Date.now();
 
 	try {
-		await mongoose.connect(process.env.MONGO_URI);
+		console.log("Testing MongoDB connection...");
+
+		await mongoose.connect(process.env.MONGO_URI, {
+			serverSelectionTimeoutMS: 5000,
+		});
 
 		const time = Date.now() - start;
 
@@ -19,6 +23,7 @@ async function testMongo() {
 		await mongoose.connection.close();
 	} catch (err) {
 		console.log("❌ Connection failed", err.message);
+		process.exit(1);
 	}
 
 	process.exit(0);

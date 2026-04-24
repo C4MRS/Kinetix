@@ -1,5 +1,7 @@
 # Kinetix
 
+![CI Status](https://github.com/Y1lion/Kinetix/actions/workflows/ci.yml/badge.svg)
+
 Kinetix is a high-performance project developed for the **Database Systems II** course. This repository follows a rigorous workflow based on traceability through Issues, Branching, and Pull Requests, focusing on the integration of Generative AI tools and performance monitoring.
 
 ## 🚀 Getting Started
