@@ -1,5 +1,3 @@
-version: "3.9"
-
 services:
   backend:
     build: ./backend
@@ -10,13 +8,25 @@ services:
       MONGO_URI: ${MONGO_URI}
       MEILI_HOST: ${MEILI_HOST}
       MEILI_MASTER_KEY: ${MEILI_MASTER_KEY}
-      MEILI_API_KEY: ${MEILI_API_KEY}
     volumes:
       - ./backend:/app
       - /app/node_modules
     restart: unless-stopped
     depends_on:
       - meilisearch
+    networks:
+      - app-network
+
+  frontend:
+    build: ./frontend
+    container_name: kinetix-frontend
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    depends_on:
+      - backend
     networks:
       - app-network
 

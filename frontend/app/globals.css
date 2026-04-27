@@ -1,0 +1,86 @@
+@import "tailwindcss";
+
+/* 1. Diciamo a Tailwind quali sono i nostri colori personalizzati */
+@theme {
+  --color-background: var(--bg-color);
+  --color-text: var(--txt-color);
+
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+
+  --color-secondary: var(--secondary);
+  --color-secondary-hover: var(--secondary-hover);
+
+  --color-tertiary: var(--tertiary);
+  --color-tertiary-hover: var(--tertiary-hover);
+}
+
+@layer base {
+  :root {
+    /* TEMA CHIARO - Luce dorata del tramonto */
+    --bg-color: #fffbeb;
+    --txt-color: #431407;
+
+    --primary: #f97316;
+    --primary-hover: #ea580c;
+
+    --secondary: #db2777;
+    --secondary-hover: #be185d;
+
+    --tertiary: #8b5cf6;
+    --tertiary-hover: #7c3aed;
+  }
+
+  .dark {
+    /* TEMA SCURO - Crepuscolo profondo */
+    --bg-color: #0c0a09;
+    --txt-color: #ffedd5;
+
+    --primary: #fb923c;
+    --primary-hover: #f97316;
+
+    --secondary: #f472b6;
+    --secondary-hover: #db2777;
+
+    --tertiary: #a78bfa;
+    --tertiary-hover: #8b5cf6;
+  }
+
+  /* Applichiamo subito i colori di base al body per assicurarci che funzionino */
+  body {
+    background-color: var(--bg-color);
+    color: var(--txt-color);
+  }
+}
+
+@layer components {
+  /* Struttura base dei bottoni */
+  .btn {
+    @apply px-5 py-2.5 rounded-xl font-medium shadow-sm transition-all duration-300 
+           active:scale-95 focus:outline-none focus:ring-2 focus:ring-offset-2 
+           disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2;
+  }
+
+  /* Adattamento dell'anello di focus per la dark mode (nero caldo) */
+  .dark .btn {
+    @apply focus:ring-offset-[#0c0a09];
+  }
+
+  /* Bottoni Solid */
+  .btn-primary {
+    @apply bg-primary text-white hover:bg-primary-hover focus:ring-primary hover:shadow-md hover:shadow-primary/40;
+  }
+
+  .btn-secondary {
+    @apply bg-secondary text-white hover:bg-secondary-hover focus:ring-secondary hover:shadow-md hover:shadow-secondary/40;
+  }
+
+  .btn-tertiary {
+    @apply bg-tertiary text-white hover:bg-tertiary-hover focus:ring-tertiary hover:shadow-md hover:shadow-tertiary/40;
+  }
+
+  /* Variante Soft (Molto elegante per azioni secondarie) */
+  .btn-soft-primary {
+    @apply bg-primary/10 text-primary hover:bg-primary/20 focus:ring-primary border border-transparent;
+  }
+}
