@@ -59,6 +59,10 @@ jobs:
           docker logs kinetix-app
           exit 1
 
+      # Check Swagger
+      - name: Check Swagger UI
+        run: curl -s -f http://localhost:3001/api-docs || exit 1
+
       # Check frontend health
       - name: Check frontend health
         run: |
