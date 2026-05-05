@@ -5,26 +5,24 @@ export const register = async (req, res) => {
 	try {
 		const { email, name, surname, password } = req.body;
 
-		// validazione base
+		// basic validation
 		if (!email || !name || !surname || !password) {
-			return res
-				.status(400)
-				.json({ message: "Tutti i campi sono obbligatori" });
+			return res.status(400).json({ message: "All fields are required" });
 		}
 
 		if (!email.includes("@")) {
-			return res.status(400).json({ message: "Email non valida" });
+			return res.status(400).json({ message: "Email is not valid" });
 		}
 
 		if (password.length < 6) {
-			return res.status(400).json({ message: "Password troppo corta" });
+			return res.status(400).json({ message: "Password is too short" });
 		}
 
-		// check esistenza
+		// check exist
 		const existingUser = await User.findOne({ email });
 
 		if (existingUser) {
-			return res.status(400).json({ message: "Email già registrata" });
+			return res.status(409).json({ message: "Email exists already" });
 		}
 
 		// hash password
@@ -38,7 +36,7 @@ export const register = async (req, res) => {
 		});
 
 		return res.status(201).json({
-			message: "Utente creato",
+			message: "User created",
 			user: {
 				id: user._id,
 				email: user.email,
@@ -46,6 +44,6 @@ export const register = async (req, res) => {
 			},
 		});
 	} catch (err) {
-		return res.status(500).json({ message: "Errore server" });
+		return res.status(500).json({ message: "Server error" });
 	}
 };
