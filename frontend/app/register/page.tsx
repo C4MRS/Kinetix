@@ -60,7 +60,8 @@ export default function RegisterPage() {
 				surname: "",
 				password: "",
 			});
-		} catch {
+		} catch (err) {
+			console.error(err);
 			setError("Connection Error");
 		}
 	};
