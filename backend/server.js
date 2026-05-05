@@ -1,11 +1,53 @@
 import express from "express";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
+import cors from "cors";
+import swaggerJsDoc from "swagger-jsdoc";
+import swaggerUi from "swagger-ui-express";
+
+import path from "path";
+import { fileURLToPath } from "url";
+
+import authRoutes from "./routes/auth.js";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 dotenv.config();
 
 const app = express();
+
+app.use(cors());
 app.use(express.json());
+
+// --- SWAGGER ---
+const swaggerOptions = {
+	definition: {
+		openapi: "3.0.0",
+		info: {
+			title: "Kinetix API",
+			version: "1.0.0",
+			description: "Interactive Documentation for Kinetix",
+		},
+		servers: [
+			{
+				url: "http://localhost:3001",
+				description: "Development Server",
+			},
+		],
+	},
+	apis: [
+		path.join(__dirname, "routes", "*.js"),
+		path.join(__dirname, "server.js"),
+	],
+};
+
+const swaggerDocs = swaggerJsDoc(swaggerOptions);
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
+// --- SWAGGER ---
+
+// routes
+app.use("/api/auth", authRoutes);
 
 mongoose
 	.connect(process.env.MONGO_URI)
@@ -17,4 +59,5 @@ app.get("/", (req, res) => {
 
 app.listen(3001, () => {
 	console.log("Server running on port 3001");
+	console.log("Swagger UI available at http://localhost:3001/api-docs");
 });
