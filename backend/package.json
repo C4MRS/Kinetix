@@ -19,6 +19,8 @@
 		"dotenv": "^17.4.2",
 		"express": "^5.2.1",
 		"meilisearch": "^0.57.0",
-		"mongoose": "^9.6.1"
+		"mongoose": "^9.6.1",
+		"swagger-jsdoc": "^6.2.8",
+		"swagger-ui-express": "^5.0.1"
 	}
 }
