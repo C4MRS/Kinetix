@@ -1,28 +1,20 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link"; // Aggiunto l'import del Link
-
 import Input from "../components/input";
+
 import MailIcon from "../components/icons/mailIcon";
-import UserIcon from "../components/icons/userIcon";
 import LockIcon from "../components/icons/lockIcon";
 
 type FormData = {
   email: string;
-  name: string;
-  surname: string;
   password: string;
 };
 
-export default function RegisterPage() {
-  const router = useRouter();
-
+export default function LoginPage() {
   const [form, setForm] = useState<FormData>({
     email: "",
-    name: "",
-    surname: "",
     password: "",
   });
 
@@ -42,7 +34,7 @@ export default function RegisterPage() {
     setSuccess("");
 
     try {
-      const res = await fetch("http://localhost:3001/api/auth/register", {
+      const res = await fetch("http://localhost:3001/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
@@ -51,19 +43,15 @@ export default function RegisterPage() {
       const data = await res.json().catch(() => null);
 
       if (!res.ok) {
-        setError(data?.message || "Error during sign up");
+        setError(data?.message || "Error during sign in");
         return;
       }
 
-      setSuccess("Registration successful! Redirecting to Login...");
+      setSuccess("Sign In successful!");
+      setForm({ email: "", password: "" });
 
-      setForm({ email: "", name: "", surname: "", password: "" });
-
-      setTimeout(() => {
-        router.push("/login");
-      }, 1500);
-    } catch (err) {
-      console.error("Connection Error:", err);
+      // Qui potrai inserire il redirect alla dashboard in futuro
+    } catch {
       setError("Connection Error");
     }
   };
@@ -74,7 +62,9 @@ export default function RegisterPage() {
         onSubmit={handleSubmit}
         className="bg-background/80 backdrop-blur-md border border-primary/20 p-8 rounded-2xl shadow-xl w-full max-w-md space-y-4"
       >
-        <h1 className="text-2xl font-bold text-center text-primary">Sign Up</h1>
+        <h1 className="text-2xl font-bold text-center text-primary mb-6">
+          Sign In
+        </h1>
 
         <Input
           type="email"
@@ -84,22 +74,7 @@ export default function RegisterPage() {
           onChange={handleChange}
           icon={<MailIcon />}
         />
-        <Input
-          type="text"
-          name="name"
-          placeholder="Name"
-          value={form.name}
-          onChange={handleChange}
-          icon={<UserIcon />}
-        />
-        <Input
-          type="text"
-          name="surname"
-          placeholder="Surname"
-          value={form.surname}
-          onChange={handleChange}
-          icon={<UserIcon />}
-        />
+
         <Input
           type="password"
           name="password"
@@ -109,25 +84,23 @@ export default function RegisterPage() {
           icon={<LockIcon />}
         />
 
-        <button type="submit" className="btn btn-primary w-full">
-          Register
-        </button>
+        <button className="btn btn-primary w-full mt-2">Login</button>
 
-        {error && <p className="text-secondary text-sm text-center">{error}</p>}
+        {error && (
+          <p className="text-secondary text-sm text-center mt-4">{error}</p>
+        )}
         {success && (
-          <p className="text-primary text-sm text-center font-medium">
-            {success}
-          </p>
+          <p className="text-primary text-sm text-center mt-4">{success}</p>
         )}
 
-        {/* --- NUOVA SEZIONE LINK AL LOGIN --- */}
-        <div className="text-center mt-4 text-sm">
-          Already have an account?{" "}
+        {/* --- NUOVA SEZIONE LINK AL REGISTER --- */}
+        <div className="text-center mt-6 text-sm">
+          Don't have an account?{" "}
           <Link
-            href="/login"
+            href="/register"
             className="text-primary hover:underline font-bold transition-all"
           >
-            Sign in
+            Sign up
           </Link>
         </div>
       </form>
