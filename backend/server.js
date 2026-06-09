@@ -9,6 +9,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 
 import authRoutes from "./routes/auth.js";
+import productsRoutes from "./routes/products.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -48,6 +49,7 @@ app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
 // routes
 app.use("/api/auth", authRoutes);
+app.use("/api/products", productsRoutes);
 
 mongoose
 	.connect(process.env.MONGO_URI)
