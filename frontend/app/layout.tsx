@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
 import DarkModeToggle from "../app/components/darkModeToggle";
+import Navbar from "./components/navbar";
 
 const geistSans = Geist({
 	variable: "--font-geist-sans",
@@ -30,10 +31,8 @@ export default function RootLayout({
 			className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
 		>
 			<body className="min-h-full bg-background text-text transition-colors duration-300">
-				{/* 🌙 Dark Mode Toggle */}
-				<DarkModeToggle />
+				<Navbar />
 
-				{/* 📦 App Content */}
 				<main className="flex-1">{children}</main>
 			</body>
 		</html>
