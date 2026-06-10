@@ -21,10 +21,7 @@ export default function DarkModeToggle() {
 	};
 
 	return (
-		<button
-			onClick={toggleDark}
-			className="btn btn-soft-primary fixed top-4 right-4"
-		>
+		<button onClick={toggleDark} className="btn btn-soft-primary">
 			{dark ? "☀️ Light" : "🌙 Dark"}
 		</button>
 	);
