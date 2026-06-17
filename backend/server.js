@@ -1,5 +1,6 @@
 import express from "express";
 import mongoose from "mongoose";
+
 import dotenv from "dotenv";
 import cors from "cors";
 import swaggerJsDoc from "swagger-jsdoc";
@@ -11,6 +12,7 @@ import { fileURLToPath } from "url";
 import authRoutes from "./routes/auth.js";
 import productsRoutes from "./routes/products.js";
 import basketRoutes from "./routes/basket.js";
+import { seedProductsIfEmpty } from "./scripts/seedProducts.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -52,15 +54,21 @@ app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 app.use("/api/auth", authRoutes);
 app.use("/api/products", productsRoutes);
 app.use("/api/basket", basketRoutes);
-mongoose
-  .connect(process.env.MONGO_URI)
-  .then(() => console.log("MongoDB connected"));
+const startServer = async () => {
+  try {
+    await mongoose.connect(process.env.MONGO_URI);
+    console.log("MongoDB connected");
 
-app.get("/", (req, res) => {
-  res.send("API actived 🚀");
-});
+    await seedProductsIfEmpty();
 
-app.listen(3001, () => {
-  console.log("Server running on port 3001");
-  console.log("Swagger UI available at http://localhost:3001/api-docs");
-});
+    app.listen(3001, () => {
+      console.log("Server running on port 3001");
+      console.log("Swagger UI available at http://localhost:3001/api-docs");
+    });
+  } catch (error) {
+    console.error("Server startup failed:", error.message);
+    process.exit(1);
+  }
+};
+
+startServer();
