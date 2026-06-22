@@ -1,144 +1,143 @@
 const productsDataset = [
-  {
-    imageURL: "https://placehold.co/300x200?text=Racchetta+Tennis",
-    name: "Racchetta da Tennis Pro",
-    description:
-      "Racchetta leggera per giocatori intermedi e professionisti, con telaio in grafite rinforzata e impugnatura antiscivolo.",
-    price: 40,
-  },
-  {
-    imageURL: "https://placehold.co/300x200?text=Pallone+Calcio",
-    name: "Pallone da Calcio Match",
-    description:
-      "Pallone regolamentare in pelle sintetica, ideale per allenamenti e partite su erba naturale o sintetica.",
-    price: 25,
-  },
-  {
-    imageURL: "https://placehold.co/300x200?text=Scarpe+Running",
-    name: "Scarpe da Running SpeedRun",
-    description:
-      "Scarpe leggere con suola ammortizzata, pensate per corsa su strada e allenamenti quotidiani.",
-    price: 65,
-  },
-  {
-    imageURL: "https://placehold.co/300x200?text=Guantoni+Boxe",
-    name: "Guantoni da Boxe Fighter",
-    description:
-      "Guantoni imbottiti con chiusura a strappo, adatti per sacco, sparring e allenamenti in palestra.",
-    price: 35,
-  },
-  {
-    imageURL: "https://placehold.co/300x200?text=Tappetino+Yoga",
-    name: "Tappetino Yoga Comfort",
-    description:
-      "Tappetino antiscivolo in materiale morbido, perfetto per yoga, pilates e stretching.",
-    price: 18,
-  },
-  {
-    imageURL: "https://placehold.co/300x200?text=Manubri",
-    name: "Set Manubri Regolabili",
-    description:
-      "Coppia di manubri con peso regolabile, ideali per allenamento muscolare a casa o in palestra.",
-    price: 55,
-  },
-  {
-    imageURL: "https://placehold.co/300x200?text=Casco+Ciclismo",
-    name: "Casco da Ciclismo Aero",
-    description:
-      "Casco leggero e ventilato, progettato per offrire protezione e comfort durante le uscite in bici.",
-    price: 45,
-  },
-  {
-    imageURL: "https://placehold.co/300x200?text=Occhialini+Nuoto",
-    name: "Occhialini da Nuoto ClearVision",
-    description:
-      "Occhialini impermeabili con lenti antiappannamento e cinturino regolabile.",
-    price: 15,
-  },
-  {
-    imageURL: "https://placehold.co/300x200?text=Mazza+Baseball",
-    name: "Mazza da Baseball SteelBat",
-    description:
-      "Mazza resistente in alluminio, adatta per allenamento e partite amatoriali.",
-    price: 38,
-  },
-  {
-    imageURL: "https://placehold.co/300x200?text=Canestro+Basket",
-    name: "Canestro da Basket Regolabile",
-    description:
-      "Canestro con altezza regolabile, ideale per cortili, palestre e allenamenti individuali.",
-    price: 120,
-  },
-  {
-    imageURL: "https://placehold.co/300x200?text=Palla+Basket",
-    name: "Palla da Basket Street",
-    description:
-      "Pallone da basket resistente, pensato per utilizzo indoor e outdoor.",
-    price: 28,
-  },
-  {
-    imageURL: "https://placehold.co/300x200?text=Zaino+Sportivo",
-    name: "Zaino Sportivo Training",
-    description:
-      "Zaino capiente con scomparto per scarpe, borraccia e accessori da palestra.",
-    price: 32,
-  },
-  {
-    imageURL: "https://placehold.co/300x200?text=Borraccia",
-    name: "Borraccia Termica Sport",
-    description:
-      "Borraccia in acciaio inox che mantiene le bevande fredde o calde durante l’allenamento.",
-    price: 16,
-  },
-  {
-    imageURL: "https://placehold.co/300x200?text=Corda+Salto",
-    name: "Corda per Saltare SpeedJump",
-    description:
-      "Corda leggera con manici ergonomici, ideale per cardio, boxe e riscaldamento.",
-    price: 12,
-  },
-  {
-    imageURL: "https://placehold.co/300x200?text=Ginocchiere",
-    name: "Ginocchiere Volley Shield",
-    description:
-      "Ginocchiere imbottite per pallavolo, utili per proteggere le articolazioni durante tuffi e cadute.",
-    price: 22,
-  },
-  {
-    imageURL: "https://placehold.co/300x200?text=Maglia+Tecnica",
-    name: "Maglia Tecnica DryFit",
-    description:
-      "Maglia sportiva traspirante, progettata per mantenere il corpo asciutto durante l’attività fisica.",
-    price: 24,
-  },
-  {
-    imageURL: "https://placehold.co/300x200?text=Pantaloncini",
-    name: "Pantaloncini Sportivi Flex",
-    description:
-      "Pantaloncini leggeri ed elastici, adatti per corsa, palestra e sport di squadra.",
-    price: 20,
-  },
-  {
-    imageURL: "https://placehold.co/300x200?text=Elastici+Fitness",
-    name: "Set Elastici Fitness",
-    description:
-      "Set di bande elastiche con diversi livelli di resistenza, perfette per tonificazione e riabilitazione.",
-    price: 19,
-  },
-  {
-    imageURL: "https://placehold.co/300x200?text=Sacco+Boxe",
-    name: "Sacco da Boxe HeavyBag",
-    description:
-      "Sacco resistente per allenamenti di boxe, kickboxing e arti marziali.",
-    price: 90,
-  },
-  {
-    imageURL: "https://placehold.co/300x200?text=Skateboard",
-    name: "Skateboard Urban Ride",
-    description:
-      "Skateboard con tavola rinforzata e ruote resistenti, adatto a principianti e uso urbano.",
-    price: 50,
-  },
+	{
+		imageURL: "https://placehold.co/300x200?text=Racchetta+Tennis",
+		name: "Pro Tennis Racket",
+		description:
+			"Lightweight racket for intermediate and professional players, featuring a reinforced graphite frame and a non-slip grip.",
+		price: 40,
+	},
+	{
+		imageURL: "https://placehold.co/300x200?text=Pallone+Calcio",
+		name: "Match Football",
+		description:
+			"Regulation football made of synthetic leather, ideal for training sessions and matches on natural or artificial grass.",
+		price: 25,
+	},
+	{
+		imageURL: "https://placehold.co/300x200?text=Scarpe+Running",
+		name: "SpeedRun Running Shoes",
+		description:
+			"Lightweight shoes with cushioned soles, designed for road running and daily workouts.",
+		price: 65,
+	},
+	{
+		imageURL: "https://placehold.co/300x200?text=Guantoni+Boxe",
+		name: "Fighter Boxing Gloves",
+		description:
+			"Padded gloves with hook-and-loop closure, suitable for heavy bag work, sparring, and gym training.",
+		price: 35,
+	},
+	{
+		imageURL: "https://placehold.co/300x200?text=Tappetino+Yoga",
+		name: "Comfort Yoga Mat",
+		description:
+			"Non-slip mat made of soft material, perfect for yoga, pilates, and stretching.",
+		price: 18,
+	},
+	{
+		imageURL: "https://placehold.co/300x200?text=Manubri",
+		name: "Adjustable Dumbbell Set",
+		description:
+			"Pair of dumbbells with adjustable weights, ideal for muscle training at home or at the gym.",
+		price: 55,
+	},
+	{
+		imageURL: "https://placehold.co/300x200?text=Casco+Ciclismo",
+		name: "Aero Cycling Helmet",
+		description:
+			"Lightweight and ventilated helmet, designed to provide protection and comfort during bike rides.",
+		price: 45,
+	},
+	{
+		imageURL: "https://placehold.co/300x200?text=Occhialini+Nuoto",
+		name: "ClearVision Swimming Goggles",
+		description:
+			"Waterproof swim goggles featuring anti-fog lenses and an adjustable strap.",
+		price: 15,
+	},
+	{
+		imageURL: "https://placehold.co/300x200?text=Mazza+Baseball",
+		name: "SteelBat Baseball Bat",
+		description:
+			"Durable aluminum bat, suitable for training and recreational matches.",
+		price: 38,
+	},
+	{
+		imageURL: "https://placehold.co/300x200?text=Canestro+Basket",
+		name: "Adjustable Basketball Hoop",
+		description:
+			"Basketball hoop with adjustable height, ideal for backyards, gyms, and individual practice.",
+		price: 120,
+	},
+	{
+		imageURL: "https://placehold.co/300x200?text=Palla+Basket",
+		name: "Street Basketball",
+		description: "Durable basketball designed for both indoor and outdoor use.",
+		price: 28,
+	},
+	{
+		imageURL: "https://placehold.co/300x200?text=Zaino+Sportivo",
+		name: "Training Sports Backpack",
+		description:
+			"Spacious backpack with dedicated compartments for shoes, water bottles, and gym accessories.",
+		price: 32,
+	},
+	{
+		imageURL: "https://placehold.co/300x200?text=Borraccia",
+		name: "Thermal Sports Flask",
+		description:
+			"Stainless steel water bottle that keeps drinks cold or hot throughout your workout.",
+		price: 16,
+	},
+	{
+		imageURL: "https://placehold.co/300x200?text=Corda+Salto",
+		name: "SpeedJump Jump Rope",
+		description:
+			"Lightweight skipping rope with ergonomic handles, ideal for cardio, boxing, and warm-ups.",
+		price: 12,
+	},
+	{
+		imageURL: "https://placehold.co/300x200?text=Ginocchiere",
+		name: "Volley Shield Knee Pads",
+		description:
+			"Padded volleyball knee pads, helpful for protecting joints during dives and falls.",
+		price: 22,
+	},
+	{
+		imageURL: "https://placehold.co/300x200?text=Maglia+Tecnica",
+		name: "DryFit Technical Shirt",
+		description:
+			"Breathable sports t-shirt, engineered to keep your body dry during physical activity.",
+		price: 24,
+	},
+	{
+		imageURL: "https://placehold.co/300x200?text=Pantaloncini",
+		name: "Flex Sports Shorts",
+		description:
+			"Lightweight and stretchy athletic shorts, suitable for running, gym sessions, and team sports.",
+		price: 20,
+	},
+	{
+		imageURL: "https://placehold.co/300x200?text=Elastici+Fitness",
+		name: "Fitness Resistance Bands Set",
+		description:
+			"Set of resistance bands with different tension levels, perfect for toning and rehabilitation exercises.",
+		price: 19,
+	},
+	{
+		imageURL: "https://placehold.co/300x200?text=Sacco+Boxe",
+		name: "HeavyBag Boxing Punching Bag",
+		description:
+			"Heavy-duty punching bag for boxing, kickboxing, and martial arts workouts.",
+		price: 90,
+	},
+	{
+		imageURL: "https://placehold.co/300x200?text=Skateboard",
+		name: "Urban Ride Skateboard",
+		description:
+			"Skateboard featuring a reinforced deck and durable wheels, suitable for beginners and urban commuting.",
+		price: 50,
+	},
 ];
 
 export default productsDataset;
