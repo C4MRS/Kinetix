@@ -30,6 +30,8 @@ const router = express.Router();
  *                     type: number
  *                   imageURL:
  *                     type: string
+ *                   tags:
+ *                     type: string
  *       '500':
  *         description: Error within server
  *
@@ -61,6 +63,10 @@ const router = express.Router();
  *               imageURL:
  *                 type: string
  *                 example: https://placehold.co/300x200?text=Racchetta+Tennis
+ *               tags:
+ *                 type: string
+ *                 example: Racchetta
+ *
  *     responses:
  *       '201':
  *         description: Product successfully created
