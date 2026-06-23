@@ -10,6 +10,11 @@ const productSchema = new mongoose.Schema(
 			required: [true, "Price is required."],
 			min: [0, "Price cannot be negative."],
 		},
+		tags: {
+			type: [String],
+			required: [true, "Tags are required."],
+			index: true,
+		},
 	},
 	{
 		timestamps: true,
