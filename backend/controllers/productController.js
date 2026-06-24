@@ -13,8 +13,8 @@ export const getProducts = async (req, res) => {
 
 export const addProduct = async (req, res) => {
 	try {
-		const { imageURL, name, description, price } = req.body;
-		if (!imageURL || !name || !description || price === undefined) {
+		const { imageURL, name, description, price, tags } = req.body;
+		if (!imageURL || !name || !description || !tags || price === undefined) {
 			return res.status(400).json({
 				message: "Every field is required.",
 			});
@@ -24,6 +24,7 @@ export const addProduct = async (req, res) => {
 			name,
 			description,
 			price,
+			tags: tags || [],
 		});
 		return res
 			.status(201)
