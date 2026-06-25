@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link"; // Aggiunto l'import del Link
-import Input from "../components/input";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 
+import Input from "../components/input";
 import MailIcon from "../components/icons/mailIcon";
 import LockIcon from "../components/icons/lockIcon";
 
@@ -13,6 +14,8 @@ type FormData = {
 };
 
 export default function LoginPage() {
+  const router = useRouter();
+
   const [form, setForm] = useState<FormData>({
     email: "",
     password: "",
@@ -20,6 +23,7 @@ export default function LoginPage() {
 
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm((prev) => ({
@@ -28,15 +32,23 @@ export default function LoginPage() {
     }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
     setError("");
     setSuccess("");
+    setIsLoading(true);
 
     try {
       const res = await fetch("http://localhost:3001/api/auth/login", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+        },
+
+        // Permette al browser di ricevere e salvare il cookie di sessione
+        credentials: "include",
+
         body: JSON.stringify(form),
       });
 
@@ -47,12 +59,19 @@ export default function LoginPage() {
         return;
       }
 
-      setSuccess("Sign In successful!");
-      setForm({ email: "", password: "" });
+      setSuccess("Sign in successful!");
+      setForm({
+        email: "",
+        password: "",
+      });
 
-      // Qui potrai inserire il redirect alla dashboard in futuro
-    } catch {
-      setError("Connection Error");
+      router.replace("/");
+      router.refresh();
+    } catch (error) {
+      console.error("Login request failed:", error);
+      setError("Connection error");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -84,18 +103,24 @@ export default function LoginPage() {
           icon={<LockIcon />}
         />
 
-        <button className="btn btn-primary w-full mt-2">Login</button>
+        <button
+          type="submit"
+          disabled={isLoading}
+          className="btn btn-primary w-full mt-2 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {isLoading ? "Signing in..." : "Login"}
+        </button>
 
         {error && (
           <p className="text-secondary text-sm text-center mt-4">{error}</p>
         )}
+
         {success && (
           <p className="text-primary text-sm text-center mt-4">{success}</p>
         )}
 
-        {/* --- NUOVA SEZIONE LINK AL REGISTER --- */}
         <div className="text-center mt-6 text-sm">
-          Don't have an account?{" "}
+          Don&apos;t have an account?{" "}
           <Link
             href="/register"
             className="text-primary hover:underline font-bold transition-all"

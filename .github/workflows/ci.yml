@@ -1,6 +1,8 @@
 name: CI Pipeline
 
 on:
+  workflow_dispatch:
+
   pull_request:
     branches: ["master"]
   push:
@@ -38,6 +40,9 @@ jobs:
           MEILI_HOST: ${{ secrets.MEILI_HOST }}
           MEILI_MASTER_KEY: ${{ secrets.MEILI_MASTER_KEY }}
           MEILI_API_KEY: ${{ secrets.MEILI_API_KEY }}
+          SESSION_SECRET: ${{ secrets.SESSION_SECRET }}
+          FRONTEND_URL: ${{ secrets.FRONTEND_URL }}
+          NODE_ENV: ${{ secrets.NODE_ENV }}
 
       # Wait for services
       - name: Wait for services

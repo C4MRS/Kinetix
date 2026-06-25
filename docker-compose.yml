@@ -8,6 +8,9 @@ services:
       MONGO_URI: ${MONGO_URI}
       MEILI_HOST: ${MEILI_HOST}
       MEILI_MASTER_KEY: ${MEILI_MASTER_KEY}
+      SESSION_SECRET: ${SESSION_SECRET}
+      FRONTEND_URL: ${FRONTEND_URL}
+      NODE_ENV: ${NODE_ENV}
     volumes:
       - ./backend:/app
       - /app/node_modules

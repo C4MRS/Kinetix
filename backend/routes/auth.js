@@ -1,5 +1,12 @@
 import express from "express";
-import { register, login } from "../controllers/authController.js";
+import {
+  register,
+  login,
+  getCurrentUser,
+  logout,
+} from "../controllers/authController.js";
+
+import { requireAuth } from "../middleware/requireAuth.js";
 
 const router = express.Router();
 
@@ -53,7 +60,7 @@ router.post("/register", register);
  * /api/auth/login:
  *   post:
  *     summary: Log in an existing user
- *     description: Authenticates a user by comparing the provided email and password against the database.
+ *     description: Authenticates the user and creates a persistent session stored in MongoDB.
  *     tags:
  *       - Authentication
  *     requestBody:
@@ -85,5 +92,44 @@ router.post("/register", register);
  *         description: Internal server error.
  */
 router.post("/login", login);
+/**
+ * @openapi
+ * /api/auth/me:
+ *   get:
+ *     summary: Get the current authenticated user
+ *     description: Returns the user stored in the current session.
+ *     tags:
+ *       - Authentication
+ *     security:
+ *       - cookieAuth: []
+ *     responses:
+ *       200:
+ *         description: Current authenticated user returned successfully.
+ *       401:
+ *         description: User not authenticated.
+ *       500:
+ *         description: Internal server error.
+ */
+router.get("/me", requireAuth, getCurrentUser);
+
+/**
+ * @openapi
+ * /api/auth/logout:
+ *   post:
+ *     summary: Log out the current user
+ *     description: Destroys the current user session and clears the session cookie.
+ *     tags:
+ *       - Authentication
+ *     security:
+ *       - cookieAuth: []
+ *     responses:
+ *       200:
+ *         description: Logout successful.
+ *       401:
+ *         description: User not authenticated.
+ *       500:
+ *         description: Unable to destroy the session.
+ */
+router.post("/logout", requireAuth, logout);
 
 export default router;
