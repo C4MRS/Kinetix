@@ -1,4 +1,5 @@
 import express from "express";
+
 import {
   createBasketItem,
   getBasketItems,
@@ -6,16 +7,40 @@ import {
   deleteBasketItem,
 } from "../controllers/basketController.js";
 
+import { requireAuth } from "../middleware/requireAuth.js";
+
 const router = express.Router();
+router.use(requireAuth);
+
+/**
+ * @openapi
+ * /api/basket:
+ *   get:
+ *     summary: Get the authenticated user's basket
+ *     tags:
+ *       - Basket
+ *     security:
+ *       - cookieAuth: []
+ *     responses:
+ *       200:
+ *         description: Basket items retrieved successfully.
+ *       401:
+ *         description: User not authenticated.
+ *       500:
+ *         description: Internal server error.
+ */
+router.get("/", getBasketItems);
 
 /**
  * @openapi
  * /api/basket:
  *   post:
  *     summary: Add a product to the basket
- *     description: Adds a product to the user's basket. If the product already exists for the same user, the quantity is incremented by 1.
+ *     description: Creates a basket item or increases its quantity by one.
  *     tags:
  *       - Basket
+ *     security:
+ *       - cookieAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -24,20 +49,19 @@ const router = express.Router();
  *             type: object
  *             required:
  *               - productId
- *               - userEmail
  *             properties:
  *               productId:
  *                 type: string
  *                 example: "665f1c2b8f1a2c0012ab3456"
- *               userEmail:
- *                 type: string
- *                 format: email
- *                 example: mario.rossi@example.com
  *     responses:
  *       201:
  *         description: Product added to basket successfully.
  *       400:
- *         description: Invalid input data.
+ *         description: Invalid or missing product ID.
+ *       401:
+ *         description: User not authenticated.
+ *       404:
+ *         description: Product not found.
  *       500:
  *         description: Internal server error.
  */
@@ -45,52 +69,19 @@ router.post("/", createBasketItem);
 
 /**
  * @openapi
- * /api/basket/{userEmail}:
- *   get:
- *     summary: Get basket items by user email
- *     description: Retrieves all basket items belonging to a specific user.
- *     tags:
- *       - Basket
- *     parameters:
- *       - in: path
- *         name: userEmail
- *         required: true
- *         schema:
- *           type: string
- *           format: email
- *         description: Email of the user.
- *     responses:
- *       200:
- *         description: Basket items retrieved successfully.
- *       400:
- *         description: Invalid or missing user email.
- *       500:
- *         description: Internal server error.
- */
-router.get("/:userEmail", getBasketItems);
-
-/**
- * @openapi
- * /api/basket/{userEmail}/{productId}:
+ * /api/basket/{productId}:
  *   patch:
- *     summary: Update basket item quantity
- *     description: Updates the quantity of a basket item by searching with user email and product ID.
+ *     summary: Update a basket item quantity
  *     tags:
  *       - Basket
+ *     security:
+ *       - cookieAuth: []
  *     parameters:
- *       - in: path
- *         name: userEmail
- *         required: true
- *         schema:
- *           type: string
- *           format: email
- *         description: Email of the user.
  *       - in: path
  *         name: productId
  *         required: true
  *         schema:
  *           type: string
- *         description: MongoDB _id of the product.
  *     requestBody:
  *       required: true
  *       content:
@@ -101,53 +92,50 @@ router.get("/:userEmail", getBasketItems);
  *               - quantity
  *             properties:
  *               quantity:
- *                 type: number
+ *                 type: integer
  *                 minimum: 1
  *                 example: 3
  *     responses:
  *       200:
  *         description: Basket item updated successfully.
  *       400:
- *         description: Invalid input data.
+ *         description: Invalid quantity or product ID.
+ *       401:
+ *         description: User not authenticated.
  *       404:
  *         description: Basket item not found.
  *       500:
  *         description: Internal server error.
  */
-router.patch("/:userEmail/:productId", updateBasketItem);
+router.patch("/:productId", updateBasketItem);
 
 /**
  * @openapi
- * /api/basket/{userEmail}/{productId}:
+ * /api/basket/{productId}:
  *   delete:
- *     summary: Delete a basket item
- *     description: Deletes a basket item by searching with user email and product ID.
+ *     summary: Remove a product from the basket
  *     tags:
  *       - Basket
+ *     security:
+ *       - cookieAuth: []
  *     parameters:
- *       - in: path
- *         name: userEmail
- *         required: true
- *         schema:
- *           type: string
- *           format: email
- *         description: Email of the user.
  *       - in: path
  *         name: productId
  *         required: true
  *         schema:
  *           type: string
- *         description: MongoDB _id of the product.
  *     responses:
  *       200:
  *         description: Basket item deleted successfully.
  *       400:
- *         description: Invalid input data.
+ *         description: Invalid product ID.
+ *       401:
+ *         description: User not authenticated.
  *       404:
  *         description: Basket item not found.
  *       500:
  *         description: Internal server error.
  */
-router.delete("/:userEmail/:productId", deleteBasketItem);
+router.delete("/:productId", deleteBasketItem);
 
 export default router;
