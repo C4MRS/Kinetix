@@ -14,8 +14,8 @@ interface Product {
 
 export default function HomePage() {
 	const [searchQuery, setSearchQuery] = useState("");
-	const [imageUrlInput, setImageUrlInput] = useState(""); // URL scritto dall'utente
-	const [activeImageUrl, setActiveImageUrl] = useState(""); // URL effettivamente cercato
+	const [imageUrlInput, setImageUrlInput] = useState(""); // URL submitted by USER
+	const [activeImageUrl, setActiveImageUrl] = useState(""); // URL searched
 	const [products, setProducts] = useState<Product[]>([]);
 	const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 	const [loading, setLoading] = useState(false);
@@ -27,13 +27,13 @@ export default function HomePage() {
 			let endpoint = "";
 
 			if (imgUrl.trim()) {
-				// Se c'è un'immagine, interroghiamo l'hybrid engine passando l'URL e l'eventuale testo
+				// If image present, query hybrid for image and text
 				endpoint = `http://localhost:3001/api/search?imageUrl=${encodeURIComponent(imgUrl.trim())}&q=${encodeURIComponent(textQuery)}`;
 			} else if (textQuery.trim()) {
-				// Altrimenti ricerca per solo testo
+				// else only text
 				endpoint = `http://localhost:3001/api/search?q=${encodeURIComponent(textQuery)}`;
 			} else {
-				// Catalogo base se tutto è vuoto
+				// Get all products
 				endpoint = `http://localhost:3001/api/products`;
 			}
 
@@ -54,7 +54,7 @@ export default function HomePage() {
 		}
 	};
 
-	// Debounce per la ricerca testuale (Scatta solo se non c'è un'immagine attiva)
+	// Debounce
 	useEffect(() => {
 		const t = setTimeout(() => {
 			if (!activeImageUrl) {
@@ -62,7 +62,7 @@ export default function HomePage() {
 					fetchProducts(searchQuery, "");
 				}
 			} else {
-				// Se c'è un'immagine attiva, aggiorna i risultati combinando il nuovo testo
+				// If image active, update results combining new text
 				fetchProducts(searchQuery, activeImageUrl);
 			}
 		}, 300);
@@ -70,13 +70,13 @@ export default function HomePage() {
 		return () => clearTimeout(t);
 	}, [searchQuery, activeImageUrl]);
 
-	// Triggers quando l'utente preme "Cerca per immagine"
+	// Triggers for image search
 	const handleImageSearchSubmit = (e: React.FormEvent) => {
 		e.preventDefault();
 		setActiveImageUrl(imageUrlInput);
 	};
 
-	// Resetta il filtro dell'immagine per tornare alla ricerca normale
+	// Filter Reset
 	const handleResetImage = () => {
 		setImageUrlInput("");
 		setActiveImageUrl("");
@@ -133,7 +133,7 @@ export default function HomePage() {
 						</div>
 					</form>
 
-					{/* Stato del filtro immagine attivo */}
+					{/* Image Filter */}
 					{activeImageUrl && (
 						<div className="flex items-center justify-between bg-secondary/10 p-3 rounded-xl border border-secondary/20 text-sm">
 							<div className="flex items-center gap-3 truncate">
