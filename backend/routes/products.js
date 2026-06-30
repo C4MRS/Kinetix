@@ -75,11 +75,6 @@ const router = express.Router();
  *               imageURL:
  *                 type: string
  *                 example: "https://upload.wikimedia.org/wikipedia/commons/7/7a/Basketball.png"
- *               tags:
- *                 type: array
- *                 description: Optional. Leaving this empty triggers Azure Auto-Tagging.
- *                 items:
- *                   type: string
  *     responses:
  *       '201':
  *         description: Product successfully created with automated tags
