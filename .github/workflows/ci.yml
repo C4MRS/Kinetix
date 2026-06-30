@@ -36,6 +36,10 @@ jobs:
       - name: Build Docker Compose
         run: docker compose up -d --build
         env:
+          AZURE_VISION_ENDPOINT: ${{ secrets.AZURE_VISION_ENDPOINT }}
+          AZURE_VISION_KEY: ${{ secrets.AZURE_VISION_KEY }}
+          AZURE_LANGUAGE_ENDPOINT: ${{ secrets.AZURE_LANGUAGE_ENDPOINT }}
+          AZURE_LANGUAGE_KEY: ${{ secrets.AZURE_LANGUAGE_KEY }}
           MONGO_URI: ${{ secrets.MONGO_URI }}
           MEILI_HOST: ${{ secrets.MEILI_HOST }}
           MEILI_MASTER_KEY: ${{ secrets.MEILI_MASTER_KEY }}
