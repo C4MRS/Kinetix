@@ -17,6 +17,7 @@ import productsRoutes from "./routes/products.js";
 import basketRoutes from "./routes/basket.js";
 import searchRoutes from "./routes/search.js";
 import hybridRoutes from "./routes/hybrid.js";
+import adminRoutes from "./routes/admin.js";
 
 import { seedProductsIfEmpty } from "./scripts/seedProducts.js";
 
@@ -115,6 +116,7 @@ app.use("/api/products", productsRoutes);
 app.use("/api/basket", basketRoutes);
 app.use("/api/search", searchRoutes);
 app.use("/api/hybrid", hybridRoutes);
+app.use("/api/admin", adminRoutes);
 
 const startServer = async () => {
   try {
