@@ -12,14 +12,16 @@ const productSchema = new mongoose.Schema(
 		},
 		tags: {
 			type: [String],
-			required: [true, "Tags are required."],
+			required: true,
+			default: [],
 			index: true,
 		},
+
+		// FUTURE AI LAYER
+		aiTags: [String],
+		aiSummary: String,
 	},
-	{
-		timestamps: true,
-	},
+	{ timestamps: true },
 );
 
-const product = mongoose.model("Product", productSchema);
-export default product;
+export default mongoose.model("Product", productSchema);
