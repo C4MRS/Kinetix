@@ -1,68 +1,126 @@
-export const getProducts = async (req, res) => {
+import bcrypt from "bcryptjs";
+import mongoose from "mongoose";
+
+import User from "../models/user.js";
+import Basket from "../models/basket.js";
+
+export const getUsers = async (req, res) => {
   try {
-    const products = await Product.find().sort({
-      createdAt: -1,
-    });
+    const users = await User.find().select("-password").sort({ createdAt: -1 });
 
     return res.status(200).json({
-      products,
+      users,
     });
   } catch (error) {
-    console.error("Admin get products error:", error);
+    console.error("Get users error:", error);
 
     return res.status(500).json({
-      message: "Unable to retrieve products",
+      message: "Unable to retrieve users",
     });
   }
 };
 
-export const deleteProduct = async (req, res) => {
+export const createUser = async (req, res) => {
   try {
-    const { productId } = req.params;
+    const { email, name, surname, password } = req.body;
 
-    if (!mongoose.Types.ObjectId.isValid(productId)) {
+    if (!email || !name || !surname || !password) {
       return res.status(400).json({
-        message: "Invalid product ID",
+        message: "All user fields are required",
       });
     }
 
-    const existingProduct = await product.findById(productId);
+    const normalizedEmail = email.trim().toLowerCase();
 
-    if (!existingProduct) {
-      return res.status(404).json({
-        message: "Product not found",
+    if (!normalizedEmail.includes("@")) {
+      return res.status(400).json({
+        message: "Email is not valid",
       });
     }
 
-    await product.findByIdAndDelete(productId);
+    if (password.length < 6) {
+      return res.status(400).json({
+        message: "Password must contain at least 6 characters",
+      });
+    }
 
-    await Basket.deleteMany({
-      productId,
+    const existingUser = await User.findOne({
+      email: normalizedEmail,
     });
 
-    try {
-      const index = meili.index("products");
-
-      const task = await index.deleteDocument(productId);
-
-      await meili.waitForTask(task.taskUid);
-
-      console.log("Product removed from Meilisearch.");
-    } catch (meiliError) {
-      console.warn(
-        "Failed to remove product from Meilisearch:",
-        meiliError.message,
-      );
+    if (existingUser) {
+      return res.status(409).json({
+        message: "Email already exists",
+      });
     }
 
-    return res.status(200).json({
-      message: "Product deleted successfully",
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const user = await User.create({
+      email: normalizedEmail,
+      name: name.trim(),
+      surname: surname.trim(),
+      password: hashedPassword,
+      role: "user",
+    });
+
+    return res.status(201).json({
+      message: "User created successfully",
+      user: {
+        id: user._id.toString(),
+        email: user.email,
+        name: user.name,
+        surname: user.surname,
+        role: user.role,
+      },
     });
   } catch (error) {
-    console.error("Delete product error:", error);
+    console.error("Create user error:", error);
 
     return res.status(500).json({
-      message: "Unable to delete product",
+      message: "Unable to create user",
+    });
+  }
+};
+
+export const deleteUser = async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      return res.status(400).json({
+        message: "Invalid user ID",
+      });
+    }
+
+    if (req.session.user.id === userId) {
+      return res.status(400).json({
+        message: "You cannot delete your own admin account",
+      });
+    }
+
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
+
+    await Basket.deleteMany({
+      userEmail: user.email.toLowerCase(),
+    });
+
+    await User.findByIdAndDelete(userId);
+
+    return res.status(200).json({
+      message: "User deleted successfully",
+    });
+  } catch (error) {
+    console.error("Delete user error:", error);
+
+    return res.status(500).json({
+      message: "Unable to delete user",
     });
   }
 };
