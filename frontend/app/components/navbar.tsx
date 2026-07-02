@@ -16,6 +16,7 @@ type User = {
   email: string;
   name: string;
   surname?: string;
+  role: "user" | "admin";
 };
 
 type BasketItem = {
@@ -206,6 +207,15 @@ export default function Navbar() {
 
             {!isSessionLoading && user && (
               <>
+                {user.role === "admin" && (
+                  <Link
+                    href="/admin"
+                    className="rounded-lg border border-primary/30 px-3 py-1.5 text-sm font-semibold text-primary transition-colors hover:border-primary hover:bg-primary/10"
+                  >
+                    Admin
+                  </Link>
+                )}
+
                 <Link
                   href="/basket"
                   aria-label="Open basket"
@@ -225,9 +235,15 @@ export default function Navbar() {
                     <UserIcon />
                   </div>
 
-                  <span className="hidden text-sm font-semibold sm:block">
-                    {user.name}
-                  </span>
+                  <div className="hidden sm:block">
+                    <span className="text-sm font-semibold">{user.name}</span>
+
+                    {user.role === "admin" && (
+                      <span className="ml-2 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase text-primary">
+                        Admin
+                      </span>
+                    )}
+                  </div>
                 </div>
 
                 <button

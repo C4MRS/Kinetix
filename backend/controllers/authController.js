@@ -5,14 +5,15 @@ export const register = async (req, res) => {
   try {
     const { email, name, surname, password } = req.body;
 
-    // Basic validation
     if (!email || !name || !surname || !password) {
       return res.status(400).json({
         message: "All fields are required",
       });
     }
 
-    if (!email.includes("@")) {
+    const normalizedEmail = email.trim().toLowerCase();
+
+    if (!normalizedEmail.includes("@")) {
       return res.status(400).json({
         message: "Email is not valid",
       });
@@ -24,8 +25,9 @@ export const register = async (req, res) => {
       });
     }
 
-    // Check whether the email is already registered
-    const existingUser = await User.findOne({ email });
+    const existingUser = await User.findOne({
+      email: normalizedEmail,
+    });
 
     if (existingUser) {
       return res.status(409).json({
@@ -33,26 +35,28 @@ export const register = async (req, res) => {
       });
     }
 
-    // Hash the password
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const user = await User.create({
-      email,
-      name,
-      surname,
+      email: normalizedEmail,
+      name: name.trim(),
+      surname: surname.trim(),
       password: hashedPassword,
+      role: "user",
     });
 
     return res.status(201).json({
       message: "User created",
       user: {
-        id: user._id,
+        id: user._id.toString(),
         email: user.email,
         name: user.name,
+        surname: user.surname,
+        role: user.role,
       },
     });
-  } catch (err) {
-    console.error("Registration error:", err);
+  } catch (error) {
+    console.error("Registration error:", error);
 
     return res.status(500).json({
       message: "Server error",
@@ -63,16 +67,17 @@ export const register = async (req, res) => {
 export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
+    const normalizedEmail = email?.trim().toLowerCase();
 
     // Basic validation
-    if (!email || !password) {
+    if (!normalizedEmail || !password) {
       return res.status(400).json({
         message: "Email and password are required",
       });
     }
 
     // Find the user in the database
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email: normalizedEmail });
 
     // Use a generic error to avoid revealing whether the email exists
     if (!user) {
@@ -106,6 +111,7 @@ export const login = async (req, res) => {
         email: user.email,
         name: user.name,
         surname: user.surname,
+        role: user.role,
       };
 
       // Save the session before returning the response
