@@ -11,15 +11,15 @@ import { fileURLToPath } from "url";
 
 import session from "express-session";
 import MongoStore from "connect-mongo";
+
 import { initMeilisearch } from "./scripts/initMeili.js";
+import { seedProductsIfEmpty } from "./scripts/seedProducts.js";
 
 import authRoutes from "./routes/auth.js";
 import productsRoutes from "./routes/products.js";
 import basketRoutes from "./routes/basket.js";
 import searchRoutes from "./routes/search.js";
 import adminRoutes from "./routes/admin.js";
-
-import { seedProductsIfEmpty } from "./scripts/seedProducts.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -36,13 +36,13 @@ if (!process.env.SESSION_SECRET) {
 
 const app = express();
 
+const PORT = process.env.PORT || 3001;
 const isProduction = process.env.NODE_ENV === "production";
 
 if (isProduction) {
   app.set("trust proxy", 1);
 }
 
-// Permette al frontend di inviare e ricevere il cookie di sessione
 app.use(
   cors({
     origin: process.env.FRONTEND_URL || "http://localhost:3000",
@@ -52,19 +52,16 @@ app.use(
 
 app.use(express.json());
 
-// Configurazione della sessione
 app.use(
   session({
     name: "kinetix.sid",
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
-
     store: MongoStore.create({
       mongoUrl: process.env.MONGO_URI,
       collectionName: "sessions",
     }),
-
     cookie: {
       httpOnly: true,
       secure: isProduction,
@@ -110,7 +107,6 @@ const swaggerDocs = swaggerJsDoc(swaggerOptions);
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 // --- SWAGGER ---
 
-// Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/products", productsRoutes);
 app.use("/api/basket", basketRoutes);
@@ -124,9 +120,16 @@ const startServer = async () => {
 
     await seedProductsIfEmpty();
 
-    app.listen(3001, () => {
-      console.log("Server running on port 3001");
-      console.log("Swagger UI available at http://localhost:3001/api-docs");
+    try {
+      await initMeilisearch();
+      console.log("Meilisearch initialized");
+    } catch (meiliError) {
+      console.warn("Meilisearch initialization failed:", meiliError.message);
+    }
+
+    app.listen(PORT, () => {
+      console.log(`Server running on port ${PORT}`);
+      console.log(`Swagger UI available at http://localhost:${PORT}/api-docs`);
     });
   } catch (error) {
     console.error("Server startup failed:", error.message);
@@ -134,5 +137,4 @@ const startServer = async () => {
   }
 };
 
-await initMeilisearch();
 startServer();
