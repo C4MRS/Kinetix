@@ -1,119 +1,164 @@
 name: CI Pipeline
 
 on:
-  workflow_dispatch:
+  push:
+    branches: [master]
 
   pull_request:
-    branches: ["master"]
-  push:
-    branches: ["master"]
+    branches: [master]
+
+  workflow_dispatch:
 
 jobs:
   docker-ci:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      # Get GitHub runner IP
-      - name: Get GitHub Runner IP
-        run: echo "RUNNER_IP=$(curl -s https://api.ipify.org)" >> $GITHUB_ENV
+      ##############################################################
 
-      # Add IP to MongoDB Atlas whitelist
-      - name: Setup MongoDB Atlas Whitelist
+      - name: Get Runner IP
         run: |
-          curl -s -u "${{ secrets.ATLAS_PUBLIC_KEY }}:${{ secrets.ATLAS_PRIVATE_KEY }}" --digest \
+          echo "RUNNER_IP=$(curl -s https://api.ipify.org)" >> $GITHUB_ENV
+
+      ##############################################################
+
+      - name: Whitelist Mongo Atlas
+        run: |
+          curl --digest \
+          -u "${{ secrets.ATLAS_PUBLIC_KEY }}:${{ secrets.ATLAS_PRIVATE_KEY }}" \
           -H "Content-Type: application/json" \
-          -X POST "https://cloud.mongodb.com/api/atlas/v1.0/groups/${{ secrets.ATLAS_PROJECT_ID }}/accessList" \
-          -d "[{\"cidrBlock\": \"${RUNNER_IP}/32\", \"comment\": \"GitHub Actions\"}]"
+          -X POST \
+          "https://cloud.mongodb.com/api/atlas/v1.0/groups/${{ secrets.ATLAS_PROJECT_ID }}/accessList" \
+          -d "[{\"cidrBlock\":\"${RUNNER_IP}/32\",\"comment\":\"GitHub Actions\"}]"
 
-      # Wait for Atlas propagation
-      - name: Wait Atlas propagation
-        run: sleep 40
+      ##############################################################
 
-      # Build containers
-      - name: Build Docker Compose
+      - name: Wait whitelist
+        run: sleep 35
+
+      ##############################################################
+
+      - name: Build containers
         run: docker compose up -d --build
         env:
-          AZURE_VISION_ENDPOINT: ${{ secrets.AZURE_VISION_ENDPOINT }}
-          AZURE_VISION_KEY: ${{ secrets.AZURE_VISION_KEY }}
-          AZURE_LANGUAGE_ENDPOINT: ${{ secrets.AZURE_LANGUAGE_ENDPOINT }}
-          AZURE_LANGUAGE_KEY: ${{ secrets.AZURE_LANGUAGE_KEY }}
           MONGO_URI: ${{ secrets.MONGO_URI }}
           MEILI_HOST: ${{ secrets.MEILI_HOST }}
           MEILI_MASTER_KEY: ${{ secrets.MEILI_MASTER_KEY }}
-          MEILI_API_KEY: ${{ secrets.MEILI_API_KEY }}
+
           SESSION_SECRET: ${{ secrets.SESSION_SECRET }}
+
           FRONTEND_URL: ${{ secrets.FRONTEND_URL }}
-          NODE_ENV: ${{ secrets.NODE_ENV }}
+          NODE_ENV: development
 
-      # Wait for services
-      - name: Wait for services
-        run: sleep 20
+          AZURE_LANGUAGE_ENDPOINT: ${{ secrets.AZURE_LANGUAGE_ENDPOINT }}
+          AZURE_LANGUAGE_KEY: ${{ secrets.AZURE_LANGUAGE_KEY }}
 
-      # Check backend health
-      - name: Check backend health
+          AZURE_VISION_ENDPOINT: ${{ secrets.AZURE_VISION_ENDPOINT }}
+          AZURE_VISION_KEY: ${{ secrets.AZURE_VISION_KEY }}
+
+      ##############################################################
+
+      - name: Wait backend
         run: |
-          for i in {1..12}; do
-            if curl -s http://localhost:3001; then
-              echo "Backend is up"
+
+          for i in {1..20}
+          do
+
+            if curl -f http://localhost:3001/api/health
+            then
               exit 0
             fi
-            echo "Waiting for backend..."
-            sleep 3
+
+            sleep 5
+
           done
 
-          echo "Backend failed"
           docker logs kinetix-app
+
           exit 1
 
-      # Check Swagger
-      - name: Check Swagger UI
-        run: curl -s -f http://localhost:3001/api-docs || exit 1
+      ##############################################################
 
-      # Check frontend health
-      - name: Check frontend health
+      - name: Wait frontend
         run: |
-          for i in {1..12}; do
-            if curl -s http://localhost:3000; then
-              echo "Frontend is up"
+
+          for i in {1..20}
+          do
+
+            if curl -f http://localhost:3000
+            then
               exit 0
             fi
-            echo "Waiting for frontend..."
-            sleep 3
+
+            sleep 5
+
           done
 
-          echo "Frontend failed"
           docker logs kinetix-frontend
+
           exit 1
 
-      # Test frontend -> backend
-      - name: Test frontend API call
+      ##############################################################
+
+      - name: Swagger Test
         run: |
-          curl -s http://localhost:3000 | grep -i "<html" || exit 1
+          curl -f http://localhost:3001/api-docs
 
-      # DB verification
-      - name: Run DB verification
-        run: docker exec kinetix-app npm run verify-db
+      ##############################################################
 
-      # Debug logs if failure
-      - name: Show backend logs
+      - name: Products endpoint
+        run: |
+          curl -f http://localhost:3001/api/products
+
+      ##############################################################
+
+      - name: Search endpoint
+        run: |
+          curl -f "http://localhost:3001/api/search?q=football"
+
+      ##############################################################
+
+      - name: Verify database
+        run: |
+          docker exec kinetix-app npm run verify-db
+
+      ##############################################################
+
+      - name: Verify Meilisearch
+        run: |
+
+          curl \
+          -H "Authorization: Bearer ${{ secrets.MEILI_MASTER_KEY }}" \
+          http://localhost:7700/health
+
+      ##############################################################
+
+      - name: Backend logs
         if: failure()
         run: docker logs kinetix-app
 
-      - name: Show frontend logs
+      ##############################################################
+
+      - name: Frontend logs
         if: failure()
         run: docker logs kinetix-frontend
 
-      # Shutdown containers
-      - name: Shutdown containers
+      ##############################################################
+
+      - name: Docker Down
         if: always()
         run: docker compose down
 
-      # Remove IP from whitelist
-      - name: Cleanup Whitelist
+      ##############################################################
+
+      - name: Remove Runner IP
         if: always()
+
         run: |
-          curl -s -u "${{ secrets.ATLAS_PUBLIC_KEY }}:${{ secrets.ATLAS_PRIVATE_KEY }}" --digest \
-          -X DELETE "https://cloud.mongodb.com/api/atlas/v1.0/groups/${{ secrets.ATLAS_PROJECT_ID }}/accessList/${RUNNER_IP}%2F32"
+
+          curl --digest \
+          -u "${{ secrets.ATLAS_PUBLIC_KEY }}:${{ secrets.ATLAS_PRIVATE_KEY }}" \
+          -X DELETE \
+          "https://cloud.mongodb.com/api/atlas/v1.0/groups/${{ secrets.ATLAS_PROJECT_ID }}/accessList/${RUNNER_IP}%2F32"

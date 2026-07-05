@@ -1,32 +1,25 @@
 import mongoose from "mongoose";
 import dotenv from "dotenv";
+import Product from "../models/product.js";
 
 dotenv.config();
 
-async function testMongo() {
-	console.log("🔍 Testing MongoDB Atlas connection...");
+try {
+	await mongoose.connect(process.env.MONGO_URI);
 
-	const start = Date.now();
+	const count = await Product.countDocuments();
 
-	try {
-		console.log("Testing MongoDB connection...");
+	console.log("Products:", count);
 
-		await mongoose.connect(process.env.MONGO_URI, {
-			serverSelectionTimeoutMS: 5000,
-		});
-
-		const time = Date.now() - start;
-
-		console.log("✅ MongoDB connected");
-		console.log(`⏱ Latency: ${time} ms`);
-
-		await mongoose.connection.close();
-	} catch (err) {
-		console.log("❌ Connection failed", err.message);
+	if (count === 0) {
+		console.error("Database is empty");
 		process.exit(1);
 	}
 
-	process.exit(0);
-}
+	console.log("Database OK");
 
-testMongo();
+	process.exit(0);
+} catch (err) {
+	console.error(err);
+	process.exit(1);
+}
