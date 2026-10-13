@@ -15,35 +15,28 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+
       - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_TOKEN }}
 
-      ##############################################################
-
       - name: Get Runner IP
         run: |
-          echo "RUNNER_IP=$(curl -s https://api.ipify.org)" >> $GITHUB_ENV
-
-      ##############################################################
+          echo "RUNNER_IP=$(curl -s https://api.ipify.org)" >> "$GITHUB_ENV"
 
       - name: Whitelist Mongo Atlas
         run: |
           curl --digest \
-          -u "${{ secrets.ATLAS_PUBLIC_KEY }}:${{ secrets.ATLAS_PRIVATE_KEY }}" \
-          -H "Content-Type: application/json" \
-          -X POST \
-          "https://cloud.mongodb.com/api/atlas/v1.0/groups/${{ secrets.ATLAS_PROJECT_ID }}/accessList" \
-          -d "[{\"cidrBlock\":\"${RUNNER_IP}/32\",\"comment\":\"GitHub Actions\"}]"
-
-      ##############################################################
+            -u "${{ secrets.ATLAS_PUBLIC_KEY }}:${{ secrets.ATLAS_PRIVATE_KEY }}" \
+            -H "Content-Type: application/json" \
+            -X POST \
+            "https://cloud.mongodb.com/api/atlas/v1.0/groups/${{ secrets.ATLAS_PROJECT_ID }}/accessList" \
+            -d "[{\"cidrBlock\":\"${RUNNER_IP}/32\",\"comment\":\"GitHub Actions\"}]"
 
       - name: Wait whitelist
         run: sleep 35
-
-      ##############################################################
 
       - name: Build containers
         run: docker compose up -d --build
@@ -53,117 +46,78 @@ jobs:
           MEILI_MASTER_KEY: ${{ secrets.MEILI_MASTER_KEY }}
 
           SESSION_SECRET: ${{ secrets.SESSION_SECRET }}
-
           FRONTEND_URL: ${{ secrets.FRONTEND_URL }}
           NODE_ENV: development
 
           AZURE_LANGUAGE_ENDPOINT: ${{ secrets.AZURE_LANGUAGE_ENDPOINT }}
           AZURE_LANGUAGE_KEY: ${{ secrets.AZURE_LANGUAGE_KEY }}
-
           AZURE_VISION_ENDPOINT: ${{ secrets.AZURE_VISION_ENDPOINT }}
           AZURE_VISION_KEY: ${{ secrets.AZURE_VISION_KEY }}
 
-      ##############################################################
+          # CI-only placeholders. No real Microsoft login is performed.
+          MICROSOFT_CLIENT_ID: "00000000-0000-0000-0000-000000000001"
+          MICROSOFT_TENANT_ID: "00000000-0000-0000-0000-000000000002"
+          MICROSOFT_CLIENT_SECRET: "ci-placeholder-not-a-real-secret"
+          MICROSOFT_REDIRECT_URI: "http://localhost:3001/api/auth/microsoft/callback"
 
       - name: Wait backend
         run: |
-
-          for i in {1..20}
-          do
-
-            if curl -f http://localhost:3001/api/health
-            then
+          for i in {1..20}; do
+            if curl -fsS http://localhost:3001/api/health; then
               exit 0
             fi
-
             sleep 5
-
           done
 
           docker logs kinetix-app
-
           exit 1
-
-      ##############################################################
 
       - name: Wait frontend
         run: |
-
-          for i in {1..20}
-          do
-
-            if curl -f http://localhost:3000
-            then
+          for i in {1..20}; do
+            if curl -fsS http://localhost:3000; then
               exit 0
             fi
-
             sleep 5
-
           done
 
           docker logs kinetix-frontend
-
           exit 1
 
-      ##############################################################
-
       - name: Swagger Test
-        run: |
-          curl -f http://localhost:3001/api-docs
-
-      ##############################################################
+        run: curl -f http://localhost:3001/api-docs
 
       - name: Products endpoint
-        run: |
-          curl -f http://localhost:3001/api/products
-
-      ##############################################################
+        run: curl -f http://localhost:3001/api/products
 
       - name: Search endpoint
-        run: |
-          curl -f "http://localhost:3001/api/search?q=football"
-
-      ##############################################################
+        run: curl -f "http://localhost:3001/api/search?q=football"
 
       - name: Verify database
-        run: |
-          docker exec kinetix-app npm run verify-db
-
-      ##############################################################
+        run: docker exec kinetix-app npm run verify-db
 
       - name: Verify Meilisearch
         run: |
-
-          curl \
-          -H "Authorization: Bearer ${{ secrets.MEILI_MASTER_KEY }}" \
-          http://localhost:7700/health
-
-      ##############################################################
+          curl -f \
+            -H "Authorization: Bearer ${{ secrets.MEILI_MASTER_KEY }}" \
+            http://localhost:7700/health
 
       - name: Backend logs
         if: failure()
         run: docker logs kinetix-app
 
-      ##############################################################
-
       - name: Frontend logs
         if: failure()
         run: docker logs kinetix-frontend
-
-      ##############################################################
 
       - name: Docker Down
         if: always()
         run: docker compose down
 
-      ##############################################################
-
       - name: Remove Runner IP
         if: always()
-
         run: |
-
           curl --digest \
-          -u "${{ secrets.ATLAS_PUBLIC_KEY }}:${{ secrets.ATLAS_PRIVATE_KEY }}" \
-          -X DELETE \
-          "https://cloud.mongodb.com/api/atlas/v1.0/groups/${{ secrets.ATLAS_PROJECT_ID }}/accessList/${RUNNER_IP}%2F32"
+            -u "${{ secrets.ATLAS_PUBLIC_KEY }}:${{ secrets.ATLAS_PRIVATE_KEY }}" \
+            -X DELETE \
+            "https://cloud.mongodb.com/api/atlas/v1.0/groups/${{ secrets.ATLAS_PROJECT_ID }}/accessList/${RUNNER_IP}%2F32"
