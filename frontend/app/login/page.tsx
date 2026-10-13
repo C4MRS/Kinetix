@@ -118,8 +118,10 @@ export default function LoginPage() {
 
 				<button
 					type="button"
+					disabled={isLoading}
+					className="btn btn-secondary w-full mt-2 disabled:opacity-50 disabled:cursor-not-allowed"
 					onClick={() => {
-						window.location.href = `${MICROSOFT_AUTH_URL}/api/auth/microsoft`;
+						window.location.href = `${API_URL}/api/auth/microsoft`;
 					}}
 				>
 					Continue with Microsoft
