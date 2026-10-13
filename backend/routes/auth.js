@@ -10,11 +10,6 @@ import {
 	microsoftCallback,
 } from "../controllers/microsoftAuthController.js";
 
-import {
-	startMicrosoftJwtTest,
-	microsoftJwtTestCallback,
-} from "../controllers/microsoftJwtTestController.js";
-
 import { requireAuth } from "../middleware/requireAuth.js";
 
 const router = express.Router();
@@ -219,43 +214,5 @@ router.get("/microsoft", startMicrosoftLogin);
  *         description: Missing or invalid Microsoft identity information.
  */
 router.get("/microsoft/callback", microsoftCallback);
-
-/**
- * @openapi
- * /api/auth/microsoft/jwt-test:
- *   get:
- *     summary: Start Microsoft JWT validation test
- *     description: Starts a separate OAuth flow for the Kinetix-API access_as_user scope.
- *     tags:
- *       - Authentication
- *     responses:
- *       302:
- *         description: Redirects to Microsoft authorization.
- *       500:
- *         description: Unable to start the test.
- */
-router.get("/microsoft/jwt-test", startMicrosoftJwtTest);
-
-/**
- * @openapi
- * /api/auth/microsoft/jwt-test/callback:
- *   get:
- *     summary: Complete Microsoft JWT validation test
- *     description: Exchanges the authorization code and tests the access token against APIM.
- *     tags:
- *       - Authentication
- *     responses:
- *       200:
- *         description: JWT successfully validated by APIM.
- *       400:
- *         description: Invalid OAuth response.
- *       403:
- *         description: Microsoft authorization denied.
- *       500:
- *         description: JWT test failed.
- *       502:
- *         description: APIM rejected the access token.
- */
-router.get("/microsoft/jwt-test/callback", microsoftJwtTestCallback);
 
 export default router;
