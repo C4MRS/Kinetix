@@ -9,8 +9,6 @@ import User from "../models/user.js";
 
 const MICROSOFT_SCOPES = ["openid", "profile", "email"];
 
-const MICROSOFT_CONSUMER_TENANT_ID = "9188040d-6c67-4c5b-b112-36a304b66dad";
-
 const GUID_REGEX =
 	/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -40,6 +38,45 @@ const redirectToFrontend = (res, status) => {
 	url.searchParams.set("microsoft", status);
 
 	return res.redirect(url.toString());
+};
+
+// Read a non-empty string claim.
+const readClaim = (value) =>
+	typeof value === "string" && value.trim() ? value.trim() : null;
+
+// Extract profile names without requiring optional Microsoft claims.
+const getMicrosoftProfile = (claims) => {
+	const givenName = readClaim(claims.given_name);
+	const familyName = readClaim(claims.family_name);
+	const displayName = readClaim(claims.name);
+
+	if (givenName || familyName) {
+		return {
+			name: givenName || displayName || "Microsoft",
+			surname: familyName || "User",
+		};
+	}
+
+	if (displayName) {
+		const parts = displayName.split(/\s+/);
+
+		if (parts.length > 1) {
+			return {
+				name: parts[0],
+				surname: parts.slice(1).join(" "),
+			};
+		}
+
+		return {
+			name: displayName,
+			surname: "User",
+		};
+	}
+
+	return {
+		name: "Microsoft",
+		surname: "User",
+	};
 };
 
 // Start the Microsoft Entra ID authorization flow.
@@ -84,7 +121,6 @@ export const microsoftCallback = async (req, res) => {
 		// Handle an authentication error returned by Microsoft.
 		if (error) {
 			console.warn("Microsoft authentication was rejected");
-
 			return redirectToFrontend(res, "failed");
 		}
 
@@ -144,6 +180,8 @@ export const microsoftCallback = async (req, res) => {
 		// Identify the account using tenant ID and object ID, not email.
 		const microsoftId = `${tenantId}:${objectId}`;
 
+		const profile = getMicrosoftProfile(claims);
+
 		let user = await User.findOne({ microsoftId });
 
 		if (!user) {
@@ -165,24 +203,13 @@ export const microsoftCallback = async (req, res) => {
 				}
 			}
 
-			// Read optional profile information.
-			const name =
-				typeof claims.given_name === "string" && claims.given_name.trim()
-					? claims.given_name.trim()
-					: "Microsoft";
-
-			const surname =
-				typeof claims.family_name === "string" && claims.family_name.trim()
-					? claims.family_name.trim()
-					: "User";
-
 			// Create a Microsoft-only account without a local password.
 			// Do not store an unverified email claim.
 			try {
 				user = await User.create({
 					microsoftId,
-					name,
-					surname,
+					name: profile.name,
+					surname: profile.surname,
 					role: "user",
 				});
 			} catch (createError) {
@@ -196,6 +223,20 @@ export const microsoftCallback = async (req, res) => {
 				} else {
 					throw createError;
 				}
+			}
+		} else {
+			// Replace fallback names only when Microsoft supplies
+			// meaningful profile information.
+			const hasProfileName =
+				profile.name !== "Microsoft" || profile.surname !== "User";
+
+			const hasFallbackName =
+				user.name === "Microsoft" && user.surname === "User";
+
+			if (hasProfileName && hasFallbackName) {
+				user.name = profile.name;
+				user.surname = profile.surname;
+				await user.save();
 			}
 		}
 
